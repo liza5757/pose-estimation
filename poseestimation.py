@@ -54,10 +54,16 @@ while cap.isOpened():
                 # print(f'x: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].x * image_width}')
                 # print(f'y: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y * image_height}')
 
-        maxx = max(thisxlist)
-        maxy = max(thisylist)
-        minx = min(thisxlist)
-        miny = min(thisylist)
+        maxx = int(max(thisxlist) * 1600)
+        maxy = int(max(thisylist) * 900)
+        minx = int(min(thisxlist) * 1600)
+        miny = int(min(thisylist) * 900)
+        # print(minx)
+        # print(miny)
+        # print(maxx)
+        # print(maxy)
+
+
 
 
 
@@ -73,8 +79,8 @@ while cap.isOpened():
         frame = cv2.resize(frame, (1600, 900))
         cv2.imwrite('F:/poseestimation/crop/Frame' + str(m) + '.jpg', frame)
         img = cv2.imread('F:/poseestimation/crop/Frame' + str(m) + '.jpg')
-        cropped_image = img[80:280, 150:330] # maxx, maxy, minx, miny
-        cv2.imwrite("F:/poseestimation/crop/CroppedImage"+ str(m) + ".jpg", cropped_image)
+        cropped_image = img[0:900, minx-40:maxx+40] # maxy: height, minx:maxx
+        cv2.imwrite("F:/poseestimation/crop/crop/CroppedImage"+ str(m) + ".jpg", cropped_image)
         m += 1
         cv2.imshow('Output', frame)
     except:
