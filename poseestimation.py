@@ -19,6 +19,8 @@ pose = mp_pose.Pose(
 # create capture object
 cap = cv2.VideoCapture('pixel.mp4')  # 'video.mp4'
 m = 0
+framewidth = 1600
+frameheight = 900
 
 
 while cap.isOpened():
@@ -54,17 +56,14 @@ while cap.isOpened():
                 # print(f'x: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].x * image_width}')
                 # print(f'y: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y * image_height}')
 
-        maxx = int(max(thisxlist) * 1600)
-        maxy = int(max(thisylist) * 900)
-        minx = int(min(thisxlist) * 1600)
-        miny = int(min(thisylist) * 900)
+        maxx = int(max(thisxlist) * framewidth)
+        maxy = int(max(thisylist) * frameheight)
+        minx = int(min(thisxlist) * framewidth)
+        miny = int(min(thisylist) * frameheight)
         # print(minx)
         # print(miny)
         # print(maxx)
         # print(maxy)
-
-
-
 
 
 
@@ -79,7 +78,11 @@ while cap.isOpened():
         frame = cv2.resize(frame, (1600, 900))
         cv2.imwrite('F:/poseestimation/crop/Frame' + str(m) + '.jpg', frame)
         img = cv2.imread('F:/poseestimation/crop/Frame' + str(m) + '.jpg')
-        cropped_image = img[0:900, minx-40:maxx+40] # maxy: height, minx:maxx
+
+        if 900-maxy > 30:
+            cropped_image = img[900-maxy+30:maxy+40, minx-40:maxx+40] # top: height, minx:maxx  0:900
+        else:
+            cropped_image = img[0:maxy - miny, minx - 40:maxx + 40]  # top: height, minx:maxx  0:900
         cv2.imwrite("F:/poseestimation/crop/crop/CroppedImage"+ str(m) + ".jpg", cropped_image)
         m += 1
         cv2.imshow('Output', frame)
