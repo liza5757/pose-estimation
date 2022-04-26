@@ -1,8 +1,6 @@
-# TechVidvan Human pose estimator
-# import necessary packages
-
 import cv2
 import mediapipe as mp
+import numpy as np
 
 
 # initialize Pose estimator
@@ -10,8 +8,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 pose = mp_pose.Pose(
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5)
+    min_detection_confidence=0.3,
+    min_tracking_confidence=0.3)
 
 
 
@@ -38,6 +36,9 @@ while cap.isOpened():
         #results = pose.process(cv2.cvtColor(sample_img, cv2.COLOR_BGR2RGB))
         thisxlist = []
         thisylist = []
+        newthisylist=[]
+
+
         # Check if any landmarks are found.
         if results.pose_landmarks:
 
@@ -49,10 +50,9 @@ while cap.isOpened():
                 thisxlist.append(results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].x)
                 thisylist.append(results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y)
 
+
                 # thislist.append(f'x: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].x * image_width}')
                 # thislist.append(f'y: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y * image_height}')
-
-
                 # print(f'x: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].x * image_width}')
                 # print(f'y: {results.pose_landmarks.landmark[mp_pose.PoseLandmark(i).value].y * image_height}')
 
@@ -60,29 +60,38 @@ while cap.isOpened():
         maxy = int(max(thisylist) * frameheight)
         minx = int(min(thisxlist) * framewidth)
         miny = int(min(thisylist) * frameheight)
-        # print(minx)
-        # print(miny)
-        # print(maxx)
-        # print(maxy)
 
-
-
+        frame = cv2.resize(frame, (1600, 900))
         #print(results.pose_landmarks)
         # draw detected skeleton on the frame
+        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                                  mp_drawing.DrawingSpec((255, 0, 0), 2, 2),
+                                  mp_drawing.DrawingSpec((255, 0, 255), 2, 2)
+                                  )
+        # Display pose on original video/live stream : optional
+        cv2.imshow("Pose Estimation", frame)
 
-        mp_drawing.draw_landmarks(
-            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        # Extractraction
+        # get shape of original frame
+        h, w, c = frame.shape
+        # create blank image with original frame size
+        #frame = np.zeros([h, w, c])
+
+        # set white background. put 0 if you want to make it black
+        frame.fill(255)
+
+        mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
+                               mp_drawing.DrawingSpec((255, 0, 0),5, 5),
+                               mp_drawing.DrawingSpec((255, 0, 255), 5, 5)
+                               )
         #print(mp_pose.PoseLandmark.name)
         # show the final output'
 
-        frame = cv2.resize(frame, (1600, 900))
+
         cv2.imwrite('F:/poseestimation/crop/Frame' + str(m) + '.jpg', frame)
         img = cv2.imread('F:/poseestimation/crop/Frame' + str(m) + '.jpg')
 
-        if 900-maxy > 30:
-            cropped_image = img[900-maxy+30:maxy+40, minx-40:maxx+40] # top: height, minx:maxx  0:900
-        else:
-            cropped_image = img[0:maxy - miny, minx - 40:maxx + 40]  # top: height, minx:maxx  0:900
+        cropped_image = img[miny-10:900, minx:maxx]  # top: height, minx:maxx  0:900   miny:maxy, minx-10:maxx+10
         cv2.imwrite("F:/poseestimation/crop/crop/CroppedImage"+ str(m) + ".jpg", cropped_image)
         m += 1
         cv2.imshow('Output', frame)
@@ -92,3 +101,5 @@ while cap.isOpened():
         break
 cap.release()
 cv2.destroyAllWindows()
+
+
